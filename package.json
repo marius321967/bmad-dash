@@ -1,0 +1,31 @@
+{
+  "name": "bmad-dash",
+  "displayName": "BMAD Dash",
+  "description": "Dashboard for BMAD projects: epics, stories, artifacts, and recent activity at a glance.",
+  "version": "0.0.1",
+  "publisher": "marius321967",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "keywords": ["bmad", "dashboard", "sprint", "epics"],
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#070C20",
+    "theme": "dark"
+  },
+  "activationEvents": [
+    "onCommand:bmad.showDash",
+    "workspaceContains:**/_bmad/config.toml"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "bmad.showDash",
+        "title": "BMAD: Show Dash"
+      }
+    ]
+  }
+}
