@@ -3,9 +3,8 @@ import { copyFileSync, cpSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
-const appDir = resolve(root, 'apps/bmad-dash');
-const outDir = resolve(root, 'dist/apps/bmad-dash');
+const appDir = dirname(fileURLToPath(import.meta.url));
+const outDir = resolve(appDir, 'dist');
 
 mkdirSync(outDir, { recursive: true });
 

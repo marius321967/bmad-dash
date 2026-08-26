@@ -7,10 +7,10 @@
     "build": {
       "executor": "nx:run-commands",
       "outputs": [
-        "{workspaceRoot}/dist/apps/bmad-dash"
+        "{projectRoot}/dist"
       ],
       "options": {
-        "command": "node build.mjs",
+        "command": "npm run build",
         "cwd": "apps/bmad-dash"
       }
     },
@@ -40,8 +40,8 @@
         "build"
       ],
       "options": {
-        "command": "vsce package --no-dependencies --allow-missing-repository --baseImagesUrl https://raw.githubusercontent.com/gv8-control/bmad-playground/HEAD/apps/bmad-dash",
-        "cwd": "dist/apps/bmad-dash"
+        "command": "npm run package",
+        "cwd": "apps/bmad-dash"
       }
     }
   },

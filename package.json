@@ -5,6 +5,10 @@
   "version": "0.0.1",
   "publisher": "marius321967",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/marius321967/bmad-dash"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -27,5 +31,28 @@
         "title": "BMAD: Show Dash"
       }
     ]
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.spec.json",
+    "test": "jest --config jest.config.ts",
+    "lint": "eslint .",
+    "package": "npm run build && cd dist && npx --no-install @vscode/vsce package --no-dependencies --baseImagesUrl https://raw.githubusercontent.com/marius321967/bmad-dash/main"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@iarna/toml": "^2.2.5",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.0.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.9.2",
+    "esbuild": "^0.28.2",
+    "eslint": "^9.39.4",
+    "jest": "^30.3.0",
+    "ts-jest": "^29.4.11",
+    "tslib": "^2.3.0",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.62.1",
+    "yaml": "^2.9.0"
   }
 }

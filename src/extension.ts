@@ -5,5 +5,6 @@ export function activate(context: vscode.ExtensionContext): void {
   activateBmadDash(context);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function -- required VS Code extension lifecycle hook
-export function deactivate(): void {}
+export function deactivate(): void {
+  // required VS Code extension lifecycle hook
+}

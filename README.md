@@ -20,7 +20,7 @@ BMAD Dash works in repositories that follow the BMAD v6 layout: a `_bmad/config.
 
 ## Usage
 
-The dashboard opens automatically from the status bar (`$(map) BMAD Map`), or run **BMAD: Show Project Map** from the Command Palette.
+The dashboard opens automatically from the status bar (`$(map) BMAD Dash`), or run **BMAD: Show Dash** from the Command Palette.
 
 ## Privacy
 
