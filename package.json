@@ -35,7 +35,7 @@
   "scripts": {
     "build": "node build.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.spec.json",
-    "test": "jest --config jest.config.ts",
+    "test": "jest --config jest.config.js",
     "lint": "eslint .",
     "package": "npm run build && cd dist && npx --no-install @vscode/vsce package --no-dependencies --baseImagesUrl https://raw.githubusercontent.com/marius321967/bmad-dash/main"
   },
