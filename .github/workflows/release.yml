@@ -1,0 +1,74 @@
+# Inert in the monorepo (apps/bmad-dash). After the mirror workflow
+# (.github/workflows/mirror-bmad-dash.yml) rewrites the subtree to the public
+# repo root, this becomes the public repo's release pipeline.
+#
+# On every push to main: bump the patch version (unless the current version
+# isn't on the marketplace yet — e.g. a manual major/minor bump, which is
+# published as-is), publish to the VS Code Marketplace, and commit the bump
+# with a git tag. The bump commit is pushed with GITHUB_TOKEN, which does not
+# re-trigger workflows, so this never recurses; '[skip ci]' is added for good
+# measure.
+#
+# No verify steps here by design: main only advances through mirror PRs that
+# auto-merge once ci.yml is green, so everything landing on main is verified.
+#
+# Requires a VSCE_PAT secret on the public repo: an Azure DevOps Personal
+# Access Token with the 'Marketplace > Manage' scope for the publisher
+# (whisker-studio).
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Bump patch version
+        run: |
+          export VERSION=$(node -p "require('./package.json').version")
+          if npx --no-install @vscode/vsce show whisker-studio.bmad-dash --json \
+            | node -e 'const s = JSON.parse(require("fs").readFileSync(0, "utf8")); process.exit(s.versions.some(v => v.version === process.env.VERSION) ? 0 : 1)'; then
+            npm version patch --no-git-tag-version
+            echo "Bumped ${VERSION} -> $(node -p "require('./package.json').version")"
+          else
+            echo "${VERSION} is not on the marketplace yet; publishing it as-is"
+          fi
+
+      - run: npm run build
+
+      - name: Publish to VS Code Marketplace
+        working-directory: dist
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: >-
+          npx --no-install @vscode/vsce publish --no-dependencies
+          --baseImagesUrl https://raw.githubusercontent.com/marius321967/bmad-dash/main
+          -p "$VSCE_PAT"
+
+      - name: Commit version bump and tag release
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          export VERSION=$(node -p "require('./package.json').version")
+          git add package.json package-lock.json
+          git diff --cached --quiet || git commit -m "chore(release): ${VERSION} [skip ci]"
+          git rev-parse -q --verify "refs/tags/v${VERSION}" >/dev/null || git tag "v${VERSION}"
+          git push origin HEAD:main
+          git push origin "v${VERSION}"
