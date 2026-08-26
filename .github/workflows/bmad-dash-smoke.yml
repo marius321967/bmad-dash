@@ -1,0 +1,47 @@
+name: BMAD Dash Smoke Tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      repos: ${{ steps.read-repos.outputs.repos }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: read-repos
+        run: |
+          repos=$(jq -R -s -c 'split("\n") | map(select(length > 0))' test/bmad-v6-projects.txt)
+          echo "repos=$repos" >> "$GITHUB_OUTPUT"
+
+  smoke:
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        repo: ${{ fromJson(needs.prepare.outputs.repos) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm install
+      - run: npm run build
+      - run: node test/smoke/build-test.mjs
+      - name: Cache VS Code test binaries
+        uses: actions/cache@v4
+        with:
+          path: .vscode-test
+          key: vscode-test-electron-ubuntu
+      - name: Run smoke test for ${{ matrix.repo }}
+        run: xvfb-run -a npx tsx test/smoke/orchestrate.ts --repo=${{ matrix.repo }}
+      - name: Upload VS Code logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vscode-smoke-logs-${{ strategy.job-index }}
+          path: .vscode-test
