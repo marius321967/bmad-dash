@@ -3,7 +3,7 @@ import * as path from 'node:path';
 import { execSync } from 'node:child_process';
 import { runTests } from '@vscode/test-electron';
 
-const appDir = path.dirname(new URL(import.meta.url).pathname);
+const appDir = __dirname;
 const repoListPath = path.resolve(appDir, '..', 'bmad-v6-projects.txt');
 const extensionDevelopmentPath = path.resolve(appDir, '..', '..', 'dist');
 const extensionTestsPath = path.resolve(appDir, 'out', 'extensionTest.js');
@@ -28,8 +28,12 @@ async function runSmokeForRepo(url: string): Promise<void> {
   await runTests({
     extensionDevelopmentPath,
     extensionTestsPath,
-    launchArgs: [repoPath, '--disable-gpu', '--disable-dev-shm-usage'],
-    userDataDir: path.join(userDataDir, repoName),
+    launchArgs: [
+      repoPath,
+      '--disable-gpu',
+      '--disable-dev-shm-usage',
+      `--user-data-dir=${path.join(userDataDir, repoName)}`,
+    ],
   });
 }
 

@@ -1,0 +1,10 @@
+https://github.com/CDCgov/cdc-open-viz
+https://github.com/alibaba/opc-starter
+https://github.com/redhat-cop/vault-config-operator
+https://github.com/raffaelespazzoli/virtualization-migration-factory-reference-implementation
+https://github.com/matthew-on-git/terraform-provider-opnsense
+https://github.com/kamalkantsingh10/OLAF
+https://github.com/jantman/workshop-inventory-tracking
+https://github.com/rollun-lc/rollun-datastore-ts
+https://github.com/terryso/SwiftWork
+https://github.com/innoq/nebu
