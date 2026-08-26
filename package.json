@@ -36,6 +36,7 @@
     "build": "node build.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.spec.json",
     "test": "jest --config jest.config.js",
+    "test:smoke": "node build.mjs && node test/smoke/build-test.mjs && xvfb-run -a tsx test/smoke/orchestrate.ts",
     "lint": "eslint .",
     "package": "npm run build && cd dist && npx --no-install @vscode/vsce package --no-dependencies --baseImagesUrl https://raw.githubusercontent.com/marius321967/bmad-dash/main"
   },
@@ -45,12 +46,14 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^22.0.0",
     "@types/vscode": "^1.85.0",
+    "@vscode/test-electron": "^3.1.0",
     "@vscode/vsce": "^3.9.2",
     "esbuild": "^0.28.2",
     "eslint": "^9.39.4",
     "jest": "^30.3.0",
     "ts-jest": "^29.4.11",
     "tslib": "^2.3.0",
+    "tsx": "^4.23.12",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.62.1",
     "yaml": "^2.9.0"
