@@ -54,13 +54,14 @@ jobs:
       - run: npm run build
 
       - name: Publish to VS Code Marketplace
-        working-directory: dist
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
-        run: >-
-          npx --no-install @vscode/vsce publish --no-dependencies
-          --baseImagesUrl https://raw.githubusercontent.com/marius321967/bmad-dash/main
-          -p "$VSCE_PAT"
+        # dist/package.json makes npm treat dist as the project root, so
+        # 'npx --no-install' run from dist cannot see the root node_modules.
+        # Invoke the vsce bin directly by path instead.
+        run: |
+          cd dist
+          node ../node_modules/@vscode/vsce/vsce publish --no-dependencies --baseImagesUrl https://raw.githubusercontent.com/marius321967/bmad-dash/main -p "$VSCE_PAT"
 
       - name: Commit version bump and tag release
         run: |
