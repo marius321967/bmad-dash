@@ -1,0 +1,22 @@
+# Inert in the monorepo (apps/bmad-dash). After the mirror workflow
+# (.github/workflows/mirror-bmad-dash.yml) rewrites the subtree to the public
+# repo root, this becomes the public repo's CI.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: npm run typecheck
+      - run: npm run test
+      - run: npm run build
