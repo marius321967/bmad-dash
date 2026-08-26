@@ -2,12 +2,15 @@
 # (.github/workflows/mirror-bmad-dash.yml) rewrites the subtree to the public
 # repo root, this becomes the public repo's release pipeline.
 #
-# On every push to main: bump the patch version (unless the current version
-# isn't on the marketplace yet — e.g. a manual major/minor bump, which is
-# published as-is), publish to the VS Code Marketplace, and commit the bump
-# with a git tag. The bump commit is pushed with GITHUB_TOKEN, which does not
-# re-trigger workflows, so this never recurses; '[skip ci]' is added for good
-# measure.
+# On every push to main: publish to the VS Code Marketplace and tag the
+# release.
+#
+# Version policy: the marketplace is the patch-number source of truth. If
+# package.json's version is ahead of the marketplace (a manual major/minor
+# bump via the monorepo), it is published as-is; otherwise the release
+# version is <latest published patch>+1. Nothing is committed or pushed to
+# main — the repo's ruleset requires changes via PR, so direct pushes are
+# rejected, and tag pushes do not retrigger this workflow.
 #
 # No verify steps here by design: main only advances through mirror PRs that
 # auto-merge once ci.yml is green, so everything landing on main is verified.
@@ -40,16 +43,31 @@ jobs:
 
       - run: npm ci
 
-      - name: Bump patch version
+      - name: Determine release version
+        id: version
         run: |
-          export VERSION=$(node -p "require('./package.json').version")
-          if npx --no-install @vscode/vsce show whisker-studio.bmad-dash --json \
-            | node -e 'const s = JSON.parse(require("fs").readFileSync(0, "utf8")); process.exit(s.versions.some(v => v.version === process.env.VERSION) ? 0 : 1)'; then
-            npm version patch --no-git-tag-version
-            echo "Bumped ${VERSION} -> $(node -p "require('./package.json').version")"
-          else
-            echo "${VERSION} is not on the marketplace yet; publishing it as-is"
-          fi
+          RELEASE_VERSION=$(npx --no-install @vscode/vsce show whisker-studio.bmad-dash --json | node -e '
+          const show = JSON.parse(require("fs").readFileSync(0, "utf8"));
+          const pkg = require("./package.json");
+          const cmp = (a, b) => {
+            const pa = a.split("-")[0].split(".").map(Number);
+            const pb = b.split("-")[0].split(".").map(Number);
+            for (let i = 0; i < 3; i++) if (pa[i] !== pb[i]) return pa[i] - pb[i];
+            return 0;
+          };
+          const latest = show.versions.map(v => v.version).sort((a, b) => cmp(b, a))[0];
+          if (cmp(pkg.version, latest) > 0) {
+            console.error(`${pkg.version} is ahead of the marketplace (${latest}); publishing as-is`);
+            console.log(pkg.version);
+          } else {
+            const [maj, min, pat] = latest.split("-")[0].split(".").map(Number);
+            const next = `${maj}.${min}.${pat + 1}`;
+            console.error(`Latest published: ${latest}; releasing ${next}`);
+            console.log(next);
+          }
+          ')
+          npm version "$RELEASE_VERSION" --no-git-tag-version
+          echo "version=$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
 
       - run: npm run build
 
@@ -63,13 +81,9 @@ jobs:
           cd dist
           node ../node_modules/@vscode/vsce/vsce publish --no-dependencies --baseImagesUrl https://raw.githubusercontent.com/marius321967/bmad-dash/main -p "$VSCE_PAT"
 
-      - name: Commit version bump and tag release
+      - name: Tag release
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          export VERSION=$(node -p "require('./package.json').version")
-          git add package.json package-lock.json
-          git diff --cached --quiet || git commit -m "chore(release): ${VERSION} [skip ci]"
-          git rev-parse -q --verify "refs/tags/v${VERSION}" >/dev/null || git tag "v${VERSION}"
-          git push origin HEAD:main
-          git push origin "v${VERSION}"
+          git rev-parse -q --verify "refs/tags/v${{ steps.version.outputs.version }}" >/dev/null || git tag "v${{ steps.version.outputs.version }}"
+          git push origin "v${{ steps.version.outputs.version }}"
