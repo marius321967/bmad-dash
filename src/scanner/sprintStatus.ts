@@ -53,11 +53,20 @@ function epicLineNumbers(raw: string): Map<number, number> {
 }
 
 /**
- * Parses sprint-status.yaml. The installer emits a known malformed line
- * (`project: bmad-easyproject_key: NOKEY`) that makes the whole document fail
- * to parse, so it is repaired deterministically before parsing.
+ * Parses sprint-status.yaml. A missing file is a normal state (BMAD installed,
+ * sprint planning not yet run) and yields empty statuses. The installer emits
+ * a known malformed line (`project: bmad-easyproject_key: NOKEY`) that makes
+ * the whole document fail to parse, so it is repaired deterministically before
+ * parsing.
  */
 export function loadSprintStatus(filePath: string): SprintStatusData {
+  if (!fs.existsSync(filePath)) {
+    return {
+      epicStatuses: new Map(),
+      storyStatuses: new Map(),
+      epicLines: new Map(),
+    };
+  }
   const raw = fs.readFileSync(filePath, 'utf8');
   const repaired = raw.replace(
     'project: bmad-easyproject_key: NOKEY',

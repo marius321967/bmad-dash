@@ -112,6 +112,17 @@ function listSubdirs(dir: string): string[] {
     .map((entry) => entry.name);
 }
 
+/** Root-level markdown files whose name starts with `prefix`. */
+function listMarkdownPrefixed(dir: string, prefix: string): string[] {
+  if (!fs.existsSync(dir)) {
+    return [];
+  }
+  return fs
+    .readdirSync(dir)
+    .filter((name) => name.startsWith(prefix) && name.endsWith('.md'))
+    .map((name) => path.join(dir, name));
+}
+
 /** Picks the first existing candidate file inside a folder. */
 function pickMain(folder: string, candidates: string[]): string | undefined {
   for (const candidate of candidates) {
@@ -188,6 +199,20 @@ function collectSources(planningArtifacts: string, outputFolder: string): Artifa
   }
   for (const file of listMarkdown(path.join(outputFolder, 'brainstorming'))) {
     sources.push({ type: 'Brainstorming', filePath: file });
+  }
+
+  // Flat-file variants at the planning-artifacts root. Real repos commonly
+  // place these directly in the root instead of the canonical subfolders.
+  const flatPrd = path.join(planningArtifacts, 'prd.md');
+  if (fs.existsSync(flatPrd)) {
+    sources.push({ type: 'PRD', filePath: flatPrd });
+  }
+  const flatUx = path.join(planningArtifacts, 'ux-design-specification.md');
+  if (fs.existsSync(flatUx)) {
+    sources.push({ type: 'UX', filePath: flatUx });
+  }
+  for (const file of listMarkdownPrefixed(planningArtifacts, 'product-brief-')) {
+    sources.push({ type: 'Brief', filePath: file });
   }
 
   return sources;

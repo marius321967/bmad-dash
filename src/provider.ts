@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as crypto from 'node:crypto';
 import * as path from 'node:path';
 import { NotBmadV6Error, loadConfig, scanRepo } from './scanner';
+import { DashboardData } from './scanner/types';
 import { renderDashboard } from './webview/renderDashboard';
 
 const REFRESH_DEBOUNCE_MS = 300;
@@ -27,16 +28,15 @@ class DashProvider {
     this.context.subscriptions.push(this.statusBarItem);
   }
 
-  /** First workspace folder that scans as a BMAD v6 repo, else undefined. */
-  private findRepoRoot(): string | undefined {
+  /** First workspace folder that scans as a BMAD v6 repo, with its dashboard data, else undefined. */
+  private scanWorkspace(): { repoRoot: string; data: DashboardData } | undefined {
     const folders = vscode.workspace.workspaceFolders;
     if (!folders) {
       return undefined;
     }
     for (const folder of folders) {
       try {
-        scanRepo(folder.uri.fsPath);
-        return folder.uri.fsPath;
+        return { repoRoot: folder.uri.fsPath, data: scanRepo(folder.uri.fsPath) };
       } catch (err) {
         if (err instanceof NotBmadV6Error) {
           continue;
@@ -47,21 +47,31 @@ class DashProvider {
     return undefined;
   }
 
+  /** First workspace folder that scans as a BMAD v6 repo, else undefined. */
+  private findRepoRoot(): string | undefined {
+    return this.scanWorkspace()?.repoRoot;
+  }
+
   show(): void {
-    let repoRoot: string | undefined;
+    let scan: { repoRoot: string; data: DashboardData } | undefined;
     try {
-      repoRoot = this.findRepoRoot();
+      scan = this.scanWorkspace();
     } catch (err) {
       vscode.window.showErrorMessage(this.errorMessage(err));
       return;
     }
-    if (!repoRoot) {
+    if (!scan) {
       vscode.window.showWarningMessage('Not a BMAD v6 repo');
       return;
     }
-    this.repoRoot = repoRoot;
+    this.repoRoot = scan.repoRoot;
     this.createOrRevealPanel();
     this.setupWatcher();
+    if (!scan.data.hasSprintStatus) {
+      vscode.window.showInformationMessage(
+        'BMAD Dash: no sprint-status.yaml found — epics and stories will appear here once sprint planning has run.'
+      );
+    }
     this.render();
   }
 
