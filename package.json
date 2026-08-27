@@ -12,8 +12,15 @@
   "engines": {
     "vscode": "^1.85.0"
   },
-  "categories": ["Other"],
-  "keywords": ["bmad", "dashboard", "sprint", "epics"],
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "bmad",
+    "dashboard",
+    "sprint",
+    "epics"
+  ],
   "icon": "icon.png",
   "galleryBanner": {
     "color": "#070C20",
