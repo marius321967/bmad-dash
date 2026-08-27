@@ -2,26 +2,26 @@ import { remoteWebBase, commitUrlFor } from '../activity';
 
 describe('remoteWebBase', () => {
   it('normalizes scp-style SSH remotes', () => {
-    expect(remoteWebBase('git@github.com:gv8-control/bmad-playground.git')).toBe(
-      'https://github.com/gv8-control/bmad-playground'
+    expect(remoteWebBase('git@github.com:the-whisker-studio/bmad-playground.git')).toBe(
+      'https://github.com/the-whisker-studio/bmad-playground'
     );
   });
 
   it('normalizes ssh:// remotes', () => {
     expect(
-      remoteWebBase('ssh://git@github.com/gv8-control/bmad-playground.git')
-    ).toBe('https://github.com/gv8-control/bmad-playground');
+      remoteWebBase('ssh://git@github.com/the-whisker-studio/bmad-playground.git')
+    ).toBe('https://github.com/the-whisker-studio/bmad-playground');
   });
 
   it('normalizes https remotes with a trailing .git', () => {
     expect(
-      remoteWebBase('https://github.com/gv8-control/bmad-playground.git')
-    ).toBe('https://github.com/gv8-control/bmad-playground');
+      remoteWebBase('https://github.com/the-whisker-studio/bmad-playground.git')
+    ).toBe('https://github.com/the-whisker-studio/bmad-playground');
   });
 
   it('normalizes https remotes without a trailing .git', () => {
-    expect(remoteWebBase('https://github.com/gv8-control/bmad-playground')).toBe(
-      'https://github.com/gv8-control/bmad-playground'
+    expect(remoteWebBase('https://github.com/the-whisker-studio/bmad-playground')).toBe(
+      'https://github.com/the-whisker-studio/bmad-playground'
     );
   });
 
