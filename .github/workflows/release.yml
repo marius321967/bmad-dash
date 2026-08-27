@@ -79,7 +79,7 @@ jobs:
         # Invoke the vsce bin directly by path instead.
         run: |
           cd dist
-          node ../node_modules/@vscode/vsce/vsce publish --no-dependencies --baseImagesUrl https://raw.githubusercontent.com/marius321967/bmad-dash/main -p "$VSCE_PAT"
+          node ../node_modules/@vscode/vsce/vsce publish --no-dependencies --baseImagesUrl https://raw.githubusercontent.com/the-whisker-studio/bmad-dash/main -p "$VSCE_PAT"
 
       - name: Tag release
         run: |

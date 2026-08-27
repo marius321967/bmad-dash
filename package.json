@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/marius321967/bmad-dash"
+    "url": "https://github.com/the-whisker-studio/bmad-dash"
   },
   "engines": {
     "vscode": "^1.85.0"
@@ -46,7 +46,7 @@
     "test:smoke": "node build.mjs && node test/smoke/build-test.mjs && xvfb-run -a tsx test/smoke/orchestrate.ts",
     "visual": "tsx test/visual/server.ts",
     "lint": "eslint .",
-    "package": "npm run build && cd dist && npx --no-install @vscode/vsce package --no-dependencies --baseImagesUrl https://raw.githubusercontent.com/marius321967/bmad-dash/main"
+    "package": "npm run build && cd dist && npx --no-install @vscode/vsce package --no-dependencies --baseImagesUrl https://raw.githubusercontent.com/the-whisker-studio/bmad-dash/main"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
