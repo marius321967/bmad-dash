@@ -44,6 +44,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.spec.json",
     "test": "jest --config jest.config.js",
     "test:smoke": "node build.mjs && node test/smoke/build-test.mjs && xvfb-run -a tsx test/smoke/orchestrate.ts",
+    "visual": "tsx test/visual/server.ts",
     "lint": "eslint .",
     "package": "npm run build && cd dist && npx --no-install @vscode/vsce package --no-dependencies --baseImagesUrl https://raw.githubusercontent.com/marius321967/bmad-dash/main"
   },
