@@ -21,6 +21,13 @@ export const styles = `
     --dash-status-review: var(--vscode-charts-purple, #7B6EE8);
     --dash-status-progress: var(--vscode-charts-orange, #F2A944);
     --dash-status-ready: var(--vscode-charts-blue, #4D8DEE);
+    /* Readable foregrounds derived by mixing toward --dash-fg. The raw
+       --vscode-charts-orange can be translucent (modern themes) or missing
+       (high-contrast themes), so the badge text must not use it directly. */
+    --dash-badge-progress-fg: color-mix(in srgb, var(--dash-status-progress) 25%, var(--dash-fg));
+    --dash-story-num-fg: color-mix(in srgb, var(--dash-dim) 20%, var(--dash-fg));
+    --dash-story-status-fg: color-mix(in srgb, var(--dash-muted) 50%, var(--dash-fg));
+    --dash-story-done-fg: color-mix(in srgb, var(--dash-dim) 25%, var(--dash-fg));
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -159,7 +166,7 @@ export const styles = `
     align-items: center;
     gap: 5px;
     font-size: 0.75rem;
-    color: var(--dash-muted);
+    color: var(--dash-story-status-fg);
   }
   .legend-dot {
     width: 8px; height: 8px;
@@ -237,7 +244,7 @@ export const styles = `
     flex-shrink: 0;
   }
   .story-num {
-    color: var(--dash-dim);
+    color: var(--dash-story-num-fg);
     font-size: 0.75rem;
     min-width: 28px;
     flex-shrink: 0;
@@ -251,14 +258,14 @@ export const styles = `
     min-width: 0;
   }
   .story-status {
-    color: var(--dash-muted);
+    color: var(--dash-story-status-fg);
     font-size: 0.75rem;
     flex-shrink: 0;
   }
   .story-row-done .story-num,
   .story-row-done .story-title,
   .story-row-done .story-status {
-    color: var(--dash-dim);
+    color: var(--dash-story-done-fg);
   }
 
   /* Status badges */
@@ -278,7 +285,7 @@ export const styles = `
   .badge-in-progress {
     border: 1px solid var(--dash-status-progress);
     background: color-mix(in srgb, var(--dash-status-progress) 8%, transparent);
-    color: var(--dash-status-progress);
+    color: var(--dash-badge-progress-fg);
   }
   .badge-backlog {
     border: 1px solid var(--dash-badge-border);
