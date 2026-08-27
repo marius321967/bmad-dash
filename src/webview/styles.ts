@@ -1,22 +1,41 @@
 /**
- * Shared CSS for the Project Map webview. Palette matches the dark VS Code
- * theme and the original mockup; browser-chrome and side-nav styles are
+ * Shared CSS for the Project Map webview. Colors are driven by the active VS
+ * Code theme via --vscode-* variables (mapped through the --dash-* tokens
+ * below), with dark-theme hex fallbacks so the dashboard never regresses on
+ * minimal or older themes. Browser-chrome and side-nav styles are
  * intentionally omitted (web-app concepts, not webview concepts).
  */
 export const styles = `
+  :root {
+    --dash-canvas-bg: var(--vscode-editor-background, #0D0D11);
+    --dash-fg: var(--vscode-foreground, #EDECF5);
+    --dash-muted: var(--vscode-descriptionForeground, #8D8CA0);
+    --dash-dim: var(--vscode-disabledForeground, #6B6B7E);
+    --dash-panel-bg: var(--vscode-editorWidget-background, #16161C);
+    --dash-surface-bg: color-mix(in srgb, var(--vscode-editorWidget-background, #16161C) 88%, var(--vscode-foreground, #EDECF5));
+    --dash-border: var(--vscode-widget-border, var(--vscode-panel-border, #1E1E26));
+    --dash-badge-border: var(--vscode-widget-border, #2B2B38);
+    --dash-accent: var(--vscode-focusBorder, #7B6EE8);
+    --dash-accent-fg: var(--vscode-textLink-foreground, #7B6EE8);
+    --dash-status-done: var(--vscode-charts-green, #3ECF8E);
+    --dash-status-review: var(--vscode-charts-purple, #7B6EE8);
+    --dash-status-progress: var(--vscode-charts-orange, #F2A944);
+    --dash-status-ready: var(--vscode-charts-blue, #4D8DEE);
+  }
+
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background: #0D0D11;
-    color: #EDECF5;
+    font-family: var(--vscode-font-family), 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--dash-canvas-bg);
+    color: var(--dash-fg);
   }
 
   /* Content area */
   .content-area {
     display: flex;
     flex-direction: column;
-    background: #0D0D11;
+    background: var(--dash-canvas-bg);
   }
 
   /* Page header */
@@ -25,18 +44,18 @@ export const styles = `
     display: flex;
     align-items: center;
     gap: 12px;
-    border-bottom: 1px solid #1E1E26;
+    border-bottom: 1px solid var(--dash-border);
   }
   .page-title {
     font-size: 1.25rem;
     font-weight: 600;
     line-height: 1.75rem;
-    color: #EDECF5;
+    color: var(--dash-fg);
   }
   .refresh-btn {
     background: transparent;
     border: none;
-    color: #8D8CA0;
+    color: var(--dash-muted);
     cursor: pointer;
     padding: 4px;
     border-radius: 6px;
@@ -46,14 +65,14 @@ export const styles = `
     align-items: center;
     justify-content: center;
   }
-  .refresh-btn:hover { color: #EDECF5; }
+  .refresh-btn:hover { color: var(--dash-fg); }
   .refresh-icon {
     font-size: 15px;
     display: inline-block;
   }
   .last-updated {
     font-size: 0.75rem;
-    color: #8D8CA0;
+    color: var(--dash-muted);
   }
 
   /* Responsive multi-column dashboard. Panels are flat siblings in the markup;
@@ -78,7 +97,7 @@ export const styles = `
 
   /* Self-contained dashboard panel */
   .panel {
-    background: #16161C;
+    background: var(--dash-panel-bg);
     border-radius: 12px;
     padding: 16px;
   }
@@ -89,7 +108,7 @@ export const styles = `
   }
   .panel-label {
     font-size: 0.75rem;
-    color: #8D8CA0;
+    color: var(--dash-muted);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     font-weight: 500;
@@ -106,11 +125,11 @@ export const styles = `
   .summary-primary {
     font-size: 1rem;
     font-weight: 600;
-    color: #EDECF5;
+    color: var(--dash-fg);
   }
   .summary-secondary {
     font-size: 0.75rem;
-    color: #8D8CA0;
+    color: var(--dash-muted);
   }
 
   /* Status ribbon (story-status distribution bar, GitHub-language-bar model) */
@@ -123,11 +142,11 @@ export const styles = `
   }
   .ribbon-seg { height: 100%; }
   .ribbon-seg + .ribbon-seg { margin-left: 2px; }
-  .seg-done        { background: #3ECF8E; }
-  .seg-review      { background: #7B6EE8; }
-  .seg-in-progress { background: #F2A944; }
-  .seg-ready       { background: #4D8DEE; }
-  .seg-backlog     { background: #8D8CA0; opacity: 0.35; }
+  .seg-done        { background: var(--dash-status-done); }
+  .seg-review      { background: var(--dash-status-review); }
+  .seg-in-progress { background: var(--dash-status-progress); }
+  .seg-ready       { background: var(--dash-status-ready); }
+  .seg-backlog     { background: var(--dash-muted); opacity: 0.35; }
 
   .ribbon-legend {
     display: flex;
@@ -140,7 +159,7 @@ export const styles = `
     align-items: center;
     gap: 5px;
     font-size: 0.75rem;
-    color: #8D8CA0;
+    color: var(--dash-muted);
   }
   .legend-dot {
     width: 8px; height: 8px;
@@ -155,7 +174,7 @@ export const styles = `
     gap: 8px;
   }
   .epic-row {
-    background: #1E1E26;
+    background: var(--dash-surface-bg);
     border-radius: 12px;
     padding: 10px 16px;
   }
@@ -163,7 +182,7 @@ export const styles = `
     cursor: pointer;
     border: 1px solid transparent;
   }
-  .epic-row-clickable:hover { border-color: #7B6EE8; }
+  .epic-row-clickable:hover { border-color: var(--dash-accent); }
   .epic-row-top {
     display: flex;
     align-items: center;
@@ -178,14 +197,14 @@ export const styles = `
   }
   .epic-num {
     font-size: 0.75rem;
-    color: #8D8CA0;
+    color: var(--dash-muted);
     font-weight: 500;
     flex-shrink: 0;
   }
   .epic-title {
     font-size: 0.875rem;
     font-weight: 600;
-    color: #EDECF5;
+    color: var(--dash-fg);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -210,7 +229,7 @@ export const styles = `
     font-size: 0.8125rem;
   }
   .story-row-clickable { cursor: pointer; }
-  .story-row-clickable:hover { border-color: #7B6EE8; }
+  .story-row-clickable:hover { border-color: var(--dash-accent); }
   .story-dot {
     width: 8px;
     height: 8px;
@@ -218,13 +237,13 @@ export const styles = `
     flex-shrink: 0;
   }
   .story-num {
-    color: #6B6B7E;
+    color: var(--dash-dim);
     font-size: 0.75rem;
     min-width: 28px;
     flex-shrink: 0;
   }
   .story-title {
-    color: #EDECF5;
+    color: var(--dash-fg);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -232,14 +251,14 @@ export const styles = `
     min-width: 0;
   }
   .story-status {
-    color: #8D8CA0;
+    color: var(--dash-muted);
     font-size: 0.75rem;
     flex-shrink: 0;
   }
   .story-row-done .story-num,
   .story-row-done .story-title,
   .story-row-done .story-status {
-    color: #6B6B7E;
+    color: var(--dash-dim);
   }
 
   /* Status badges */
@@ -252,19 +271,19 @@ export const styles = `
   }
   .badge-completed,
   .badge-done {
-    border: 1px solid #2B2B38;
+    border: 1px solid var(--dash-badge-border);
     background: transparent;
-    color: #8D8CA0;
+    color: var(--dash-muted);
   }
   .badge-in-progress {
-    border: 1px solid #F2A944;
-    background: rgba(242,169,68,0.08);
-    color: #F2A944;
+    border: 1px solid var(--dash-status-progress);
+    background: color-mix(in srgb, var(--dash-status-progress) 8%, transparent);
+    color: var(--dash-status-progress);
   }
   .badge-backlog {
-    border: 1px solid #2B2B38;
+    border: 1px solid var(--dash-badge-border);
     background: transparent;
-    color: #6B6B7E;
+    color: var(--dash-dim);
   }
 
   /* ---- Artifact cards ---- */
@@ -274,7 +293,7 @@ export const styles = `
     gap: 12px;
   }
   .artifact-card {
-    background: #1E1E26;
+    background: var(--dash-surface-bg);
     border: 1px solid transparent;
     border-radius: 12px;
     padding: 12px 16px;
@@ -283,7 +302,7 @@ export const styles = `
     justify-content: space-between;
     cursor: pointer;
   }
-  .artifact-card:hover { border-color: #7B6EE8; }
+  .artifact-card:hover { border-color: var(--dash-accent); }
 
   .artifact-card-left {
     display: flex;
@@ -292,7 +311,7 @@ export const styles = `
   }
   .artifact-type {
     font-size: 0.75rem;
-    color: #8D8CA0;
+    color: var(--dash-muted);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     font-weight: 500;
@@ -300,7 +319,7 @@ export const styles = `
   .artifact-title {
     font-size: 0.875rem;
     font-weight: 600;
-    color: #EDECF5;
+    color: var(--dash-fg);
   }
 
   /* ---- Recent activity ---- */
@@ -314,33 +333,33 @@ export const styles = `
     justify-content: space-between;
     gap: 16px;
     padding: 8px 4px;
-    border-bottom: 1px solid #1E1E26;
+    border-bottom: 1px solid var(--dash-border);
     font-size: 0.875rem;
   }
   .activity-row:last-child { border-bottom: none; }
   .activity-row-clickable { cursor: pointer; }
-  .activity-row-clickable:hover .activity-title { color: #7B6EE8; }
+  .activity-row-clickable:hover .activity-title { color: var(--dash-accent-fg); }
   .activity-title {
-    color: #EDECF5;
+    color: var(--dash-fg);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .activity-type { color: #8D8CA0; font-size: 0.75rem; margin-right: 8px; }
+  .activity-type { color: var(--dash-muted); font-size: 0.75rem; margin-right: 8px; }
   .activity-link {
     color: inherit;
     text-decoration: none;
     cursor: pointer;
   }
-  .activity-link:hover { color: #7B6EE8; }
+  .activity-link:hover { color: var(--dash-accent-fg); }
   .activity-time {
-    color: #8D8CA0;
+    color: var(--dash-muted);
     font-size: 0.75rem;
     flex-shrink: 0;
   }
-  .activity-empty { color: #8D8CA0; font-size: 0.875rem; padding: 8px 4px; }
+  .activity-empty { color: var(--dash-muted); font-size: 0.875rem; padding: 8px 4px; }
 
   /* ---- Sprint changes (minor, bottom) ---- */
-  .sprint-changes .activity-title { color: #8D8CA0; }
-  .sprint-changes .activity-type { color: #6B6B7E; }
+  .sprint-changes .activity-title { color: var(--dash-muted); }
+  .sprint-changes .activity-type { color: var(--dash-dim); }
 `;

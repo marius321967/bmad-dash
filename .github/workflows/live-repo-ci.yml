@@ -1,4 +1,4 @@
-name: BMAD Dash Smoke Tests
+name: Real-repo Tests
 
 on:
   workflow_dispatch:
