@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import ts from 'typescript-eslint';
+import globals from 'globals';
 
 // Self-contained flat config: the app is mirrored as a standalone repo
 // (github.com/marius321967/bmad-dash) where the monorepo root config and its
@@ -10,6 +11,12 @@ export default [
   },
   js.configs.recommended,
   ...ts.configs.recommended,
+  {
+    files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
   {
     files: [
       '**/*.ts',

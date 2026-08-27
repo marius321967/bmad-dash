@@ -1,3 +1,4 @@
+import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { DashboardData, Epic, ProgressSummary } from './types';
 import { loadConfig } from './config';
@@ -66,6 +67,7 @@ export function scanRepo(repoRoot: string): DashboardData {
     activity: loadActivity(repoRoot, config.outputFolder),
     sprintChanges: loadSprintChanges(config.planningArtifacts, repoRoot),
     sprintStatusPath: path.relative(repoRoot, sprintStatusPath),
+    hasSprintStatus: fs.existsSync(sprintStatusPath),
     generatedAt: new Date().toISOString(),
   };
 }

@@ -471,7 +471,7 @@ implementation_artifacts = "{project-root}/_bmad/implementation-artifacts"
     }
   });
 
-  it('surfaces a missing sprint-status.yaml as an error (no silent fallback)', () => {
+  it('treats a missing sprint-status.yaml as a normal pre-planning state', () => {
     const root2 = fs.mkdtempSync(path.join(os.tmpdir(), 'bmad-noyaml-'));
     try {
       writeFile(
@@ -485,7 +485,10 @@ planning_artifacts = "{project-root}/_bmad/planning-artifacts"
 implementation_artifacts = "{project-root}/_bmad/implementation-artifacts"
 `
       );
-      expect(() => scanRepo(root2)).toThrow(/sprint-status\.yaml/);
+      const data = scanRepo(root2);
+      expect(data.hasSprintStatus).toBe(false);
+      expect(data.epics).toEqual([]);
+      expect(data.progress.storiesTotal).toBe(0);
     } finally {
       fs.rmSync(root2, { recursive: true, force: true });
     }
@@ -574,15 +577,162 @@ updated: 2024-01-01
       fs.rmSync(root2, { recursive: true, force: true });
     }
   });
+ });
+
+describe('flat-file artifacts at the planning-artifacts root', () => {
+  function buildFlatFixture(): string {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'bmad-flat-'));
+    writeFile(
+      root,
+      '_bmad/config.toml',
+      `[core]
+output_folder = "{project-root}/_bmad-output"
+
+[modules.bmm]
+planning_artifacts = "{project-root}/_bmad/planning-artifacts"
+implementation_artifacts = "{project-root}/_bmad/implementation-artifacts"
+`
+    );
+    writeFile(
+      root,
+      '_bmad/implementation-artifacts/sprint-status.yaml',
+      'development_status:\n'
+    );
+    return root;
+  }
+
+  it('recognizes a flat prd.md as a PRD artifact', () => {
+    const root = buildFlatFixture();
+    try {
+      writeFile(
+        root,
+        '_bmad/planning-artifacts/prd.md',
+        `---
+title: Flat PRD
+status: approved
+---
+# Flat PRD
+`
+      );
+      const { artifacts } = scanRepo(root);
+      expect(artifacts).toHaveLength(1);
+      expect(artifacts[0].type).toBe('PRD');
+      expect(artifacts[0].title).toBe('Flat PRD');
+      expect(artifacts[0].path).toBe('_bmad/planning-artifacts/prd.md');
+      expect(artifacts[0].status).toBe('completed');
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('recognizes a flat ux-design-specification.md as a UX artifact', () => {
+    const root = buildFlatFixture();
+    try {
+      writeFile(
+        root,
+        '_bmad/planning-artifacts/ux-design-specification.md',
+        `---
+title: Flat UX
+status: final
+---
+# Flat UX
+`
+      );
+      const { artifacts } = scanRepo(root);
+      expect(artifacts).toHaveLength(1);
+      expect(artifacts[0].type).toBe('UX');
+      expect(artifacts[0].title).toBe('Flat UX');
+      expect(artifacts[0].path).toBe('_bmad/planning-artifacts/ux-design-specification.md');
+      expect(artifacts[0].status).toBe('completed');
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('recognizes flat product-brief-*.md files as Brief artifacts', () => {
+    const root = buildFlatFixture();
+    try {
+      writeFile(
+        root,
+        '_bmad/planning-artifacts/product-brief-foo-2026-03-13.md',
+        `---
+title: Flat Brief
+status: draft
+---
+# Flat Brief
+`
+      );
+      const { artifacts } = scanRepo(root);
+      expect(artifacts).toHaveLength(1);
+      expect(artifacts[0].type).toBe('Brief');
+      expect(artifacts[0].title).toBe('Flat Brief');
+      expect(artifacts[0].path).toBe(
+        '_bmad/planning-artifacts/product-brief-foo-2026-03-13.md'
+      );
+      expect(artifacts[0].status).toBe('in-progress');
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('collects multiple flat artifacts together with correct types', () => {
+    const root = buildFlatFixture();
+    try {
+      writeFile(root, '_bmad/planning-artifacts/prd.md', '---\ntitle: P\n---\n# P\n');
+      writeFile(
+        root,
+        '_bmad/planning-artifacts/ux-design-specification.md',
+        '---\ntitle: U\n---\n# U\n'
+      );
+      writeFile(
+        root,
+        '_bmad/planning-artifacts/product-brief-a-2026-01-01.md',
+        '---\ntitle: B\n---\n# B\n'
+      );
+      const { artifacts } = scanRepo(root);
+      const types = artifacts.map((a) => a.type).sort();
+      expect(types).toEqual(['Brief', 'PRD', 'UX']);
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('does not treat unrelated root markdown as flat artifacts', () => {
+    const root = buildFlatFixture();
+    try {
+      writeFile(root, '_bmad/planning-artifacts/epics.md', '# Epics\n');
+      writeFile(root, '_bmad/planning-artifacts/notes.md', '# Notes\n');
+      const { artifacts } = scanRepo(root);
+      expect(artifacts).toEqual([]);
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('does not double-count when both canonical and flat layouts exist', () => {
+    const root = buildFlatFixture();
+    try {
+      writeFile(root, '_bmad/planning-artifacts/prds/my-prd/prd.md', '---\ntitle: Sub PRD\n---\n');
+      writeFile(root, '_bmad/planning-artifacts/prd.md', '---\ntitle: Flat PRD\n---\n');
+      const { artifacts } = scanRepo(root);
+      const prds = artifacts.filter((a) => a.type === 'PRD');
+      expect(prds).toHaveLength(2);
+      expect(prds.map((a) => a.title).sort()).toEqual(['Flat PRD', 'Sub PRD']);
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
 });
 
 describe('loadSprintStatus', () => {
-  it('throws when the file does not exist', () => {
+  it('returns empty statuses when the file does not exist', () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'bmad-nofile-'));
     try {
-      expect(() =>
-        loadSprintStatus(path.join(root, 'sprint-status.yaml'))
-      ).toThrow(/sprint-status\.yaml/);
+      const data = loadSprintStatus(path.join(root, 'sprint-status.yaml'));
+      expect(data.epicStatuses.size).toBe(0);
+      expect(data.storyStatuses.size).toBe(0);
+      expect(data.epicLines.size).toBe(0);
+      expect(data.project).toBeUndefined();
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
     }

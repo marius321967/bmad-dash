@@ -98,6 +98,8 @@ export interface DashboardData {
   sprintChanges: SprintChange[];
   /** Repo-relative path to sprint-status.yaml, for epic click-through. */
   sprintStatusPath: string;
+  /** False when sprint-status.yaml does not exist yet (sprint planning not run). */
+  hasSprintStatus: boolean;
   /** ISO timestamp of when the scan ran. */
   generatedAt: string;
 }
