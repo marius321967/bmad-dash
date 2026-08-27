@@ -2,8 +2,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
 [![VS Code Marketplace](https://img.shields.io/badge/Marketplace-bmad--dash-0e639c)](https://marketplace.visualstudio.com/items?itemName=whisker-studio.bmad-dash)
-[![CI](https://github.com/marius321967/bmad-dash/actions/workflows/ci.yml/badge.svg)](https://github.com/marius321967/bmad-dash/actions/workflows/ci.yml)
-[![Real-repo Tests](https://github.com/marius321967/bmad-dash/actions/workflows/live-repo-ci.yml/badge.svg)](https://github.com/marius321967/bmad-dash/actions/workflows/live-repo-ci.yml)
+[![CI](https://github.com/the-whisker-studio/bmad-dash/actions/workflows/ci.yml/badge.svg)](https://github.com/the-whisker-studio/bmad-dash/actions/workflows/ci.yml)
+[![Real-repo Tests](https://github.com/the-whisker-studio/bmad-dash/actions/workflows/live-repo-ci.yml/badge.svg)](https://github.com/the-whisker-studio/bmad-dash/actions/workflows/live-repo-ci.yml)
 
 A live dashboard for [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD) v6 projects, right inside VS Code. See epics, stories, artifacts, and recent activity at a glance — without digging through your planning folders.
 

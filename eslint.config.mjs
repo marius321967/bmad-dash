@@ -3,7 +3,7 @@ import ts from 'typescript-eslint';
 import globals from 'globals';
 
 // Self-contained flat config: the app is mirrored as a standalone repo
-// (github.com/marius321967/bmad-dash) where the monorepo root config and its
+// (github.com/the-whisker-studio/bmad-dash) where the monorepo root config and its
 // @nx/eslint-plugin dependency do not exist.
 export default [
   {
