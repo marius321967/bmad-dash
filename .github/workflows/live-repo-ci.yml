@@ -11,7 +11,7 @@ jobs:
     outputs:
       repos: ${{ steps.read-repos.outputs.repos }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: read-repos
         run: |
           repos=$(jq -R -s -c 'split("\n") | map(select(length > 0))' test/bmad-v6-projects.txt)
@@ -26,8 +26,8 @@ jobs:
       matrix:
         repo: ${{ fromJson(needs.prepare.outputs.repos) }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
           cache: 'npm'
@@ -35,7 +35,7 @@ jobs:
       - run: npm run build
       - run: node test/smoke/build-test.mjs
       - name: Cache VS Code test binaries
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .vscode-test
           key: vscode-test-electron-ubuntu
@@ -43,7 +43,7 @@ jobs:
         run: xvfb-run -a npx tsx test/smoke/orchestrate.ts --repo=${{ matrix.repo }}
       - name: Upload VS Code logs
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: vscode-smoke-logs-${{ strategy.job-index }}
           path: .vscode-test
