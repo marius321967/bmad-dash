@@ -71,12 +71,23 @@ jobs:
 
       - run: npm run build
 
-      - name: Publish to VS Code Marketplace
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+      - name: Package VSIX
         # dist/package.json makes npm treat dist as the project root, so
         # 'npx --no-install' run from dist cannot see the root node_modules.
         # Invoke the vsce bin directly by path instead.
+        run: |
+          cd dist
+          node ../node_modules/@vscode/vsce/vsce package --no-dependencies --baseImagesUrl https://raw.githubusercontent.com/the-whisker-studio/bmad-dash/main
+
+      - name: Upload VSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bmad-dash-v${{ steps.version.outputs.version }}.vsix
+          path: dist/*.vsix
+
+      - name: Publish to VS Code Marketplace
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
           cd dist
           node ../node_modules/@vscode/vsce/vsce publish --no-dependencies --baseImagesUrl https://raw.githubusercontent.com/the-whisker-studio/bmad-dash/main -p "$VSCE_PAT"
