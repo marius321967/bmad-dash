@@ -2,8 +2,8 @@
 # (.github/workflows/mirror-bmad-dash.yml) rewrites the subtree to the public
 # repo root, this becomes the public repo's release pipeline.
 #
-# On every push to main: publish to the VS Code Marketplace and tag the
-# release.
+# On every push to main: publish to the VS Code Marketplace, tag the release,
+# and create a GitHub Release with the packaged .vsix attached.
 #
 # Version policy: the marketplace is the patch-number source of truth. If
 # package.json's version is ahead of the marketplace (a manual major/minor
@@ -35,8 +35,8 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -80,7 +80,7 @@ jobs:
           node ../node_modules/@vscode/vsce/vsce package --no-dependencies --baseImagesUrl https://raw.githubusercontent.com/the-whisker-studio/bmad-dash/main
 
       - name: Upload VSIX artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: bmad-dash-v${{ steps.version.outputs.version }}.vsix
           path: dist/*.vsix
@@ -98,3 +98,11 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git rev-parse -q --verify "refs/tags/v${{ steps.version.outputs.version }}" >/dev/null || git tag "v${{ steps.version.outputs.version }}"
           git push origin "v${{ steps.version.outputs.version }}"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ steps.version.outputs.version }}" dist/*.vsix \
+            --title "v${{ steps.version.outputs.version }}" \
+            --generate-notes
