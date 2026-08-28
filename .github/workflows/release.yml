@@ -5,11 +5,11 @@
 # On every push to main: publish to the VS Code Marketplace and Open VSX, tag
 # the release, and create a GitHub Release with the packaged .vsix attached.
 #
-# Version policy: the marketplace is the patch-number source of truth. If
-# package.json's version is ahead of the marketplace (a manual major/minor
-# bump via the monorepo), it is published as-is; otherwise the release
-# version is <latest published patch>+1. Nothing is committed or pushed to
-# main — the repo's ruleset requires changes via PR, so direct pushes are
+# Version policy: the latest GitHub release is the patch-number source of
+# truth. If package.json's version is ahead of the latest release (a manual
+# major/minor bump via the monorepo), it is published as-is; otherwise the
+# release version is <latest release patch>+1. Nothing is committed or pushed
+# to main — the repo's ruleset requires changes via PR, so direct pushes are
 # rejected, and tag pushes do not retrigger this workflow.
 #
 # No verify steps here by design: main only advances through mirror PRs that
@@ -46,9 +46,11 @@ jobs:
 
       - name: Determine release version
         id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          RELEASE_VERSION=$(npx --no-install @vscode/vsce show whisker-studio.bmad-dash --json | node -e '
-          const show = JSON.parse(require("fs").readFileSync(0, "utf8"));
+          RELEASE_VERSION=$(gh release list --limit 1 --json tagName --jq '.[0].tagName' | node -e '
+          const input = require("fs").readFileSync(0, "utf8").trim().replace(/^v/, "");
           const pkg = require("./package.json");
           const cmp = (a, b) => {
             const pa = a.split("-")[0].split(".").map(Number);
@@ -56,14 +58,16 @@ jobs:
             for (let i = 0; i < 3; i++) if (pa[i] !== pb[i]) return pa[i] - pb[i];
             return 0;
           };
-          const latest = show.versions.map(v => v.version).sort((a, b) => cmp(b, a))[0];
-          if (cmp(pkg.version, latest) > 0) {
-            console.error(`${pkg.version} is ahead of the marketplace (${latest}); publishing as-is`);
+          if (!input) {
+            console.error(`No prior release; publishing ${pkg.version} as-is`);
+            console.log(pkg.version);
+          } else if (cmp(pkg.version, input) > 0) {
+            console.error(`${pkg.version} is ahead of the latest release (${input}); publishing as-is`);
             console.log(pkg.version);
           } else {
-            const [maj, min, pat] = latest.split("-")[0].split(".").map(Number);
+            const [maj, min, pat] = input.split("-")[0].split(".").map(Number);
             const next = `${maj}.${min}.${pat + 1}`;
-            console.error(`Latest published: ${latest}; releasing ${next}`);
+            console.error(`Latest release: ${input}; releasing ${next}`);
             console.log(next);
           }
           ')
