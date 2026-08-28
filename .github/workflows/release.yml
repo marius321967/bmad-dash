@@ -2,8 +2,8 @@
 # (.github/workflows/mirror-bmad-dash.yml) rewrites the subtree to the public
 # repo root, this becomes the public repo's release pipeline.
 #
-# On every push to main: publish to the VS Code Marketplace, tag the release,
-# and create a GitHub Release with the packaged .vsix attached.
+# On every push to main: publish to the VS Code Marketplace and Open VSX, tag
+# the release, and create a GitHub Release with the packaged .vsix attached.
 #
 # Version policy: the marketplace is the patch-number source of truth. If
 # package.json's version is ahead of the marketplace (a manual major/minor
@@ -17,7 +17,8 @@
 #
 # Requires a VSCE_PAT secret on the public repo: an Azure DevOps Personal
 # Access Token with the 'Marketplace > Manage' scope for the publisher
-# (whisker-studio).
+# (whisker-studio). Also requires an OPENVSX_RELEASE_TOKEN secret for the
+# Open VSX registry.
 name: Release
 
 on:
@@ -91,6 +92,13 @@ jobs:
         run: |
           cd dist
           node ../node_modules/@vscode/vsce/vsce publish --no-dependencies --baseImagesUrl https://raw.githubusercontent.com/the-whisker-studio/bmad-dash/main -p "$VSCE_PAT"
+
+      - name: Publish to Open VSX
+        env:
+          OPENVSX_TOKEN: ${{ secrets.OPENVSX_RELEASE_TOKEN }}
+        run: |
+          cd dist
+          npx --yes ovsx publish *.vsix -p "$OPENVSX_TOKEN"
 
       - name: Tag release
         run: |
